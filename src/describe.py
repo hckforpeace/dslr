@@ -11,10 +11,16 @@ if __name__ == "__main__":
 
     filename = sys.argv[1]
 
-    df = read(filename)
-    df = getNumericalValues(df)
+    try:
+        df = read(filename)
+        df = getNumericalValues(df)
+    except (FileNotFoundError, PermissionError, ValueError) as e:
+        print(f"error: {e}", file=sys.stderr)
+        sys.exit(1)
 
-    print(df.describe())
+    if df.empty or len(df.columns) == 0:
+        print("error: no numerical columns to describe", file=sys.stderr)
+        sys.exit(1)
 
     table = PrettyTable()
     table.border = False
@@ -22,9 +28,9 @@ if __name__ == "__main__":
     table.left_padding_width = 0
     table.right_padding_width = 2
     fields = [""]
-    countRow = ["Count"]
-    meanRow = ["Mean"]
-    stdRow = ["Std"]
+    countRow = ["count"]
+    meanRow = ["mean"]
+    stdRow = ["std"]
     q1Row = ["25%"]
     q2Row = ["50%"]
     q3Row = ["75%"]
@@ -45,8 +51,7 @@ if __name__ == "__main__":
         q3Row.append(f"{q3(df[title]):.6f}")
         minRow.append(f"{min(df[title]):.6f}")
         maxRow.append(f"{max(df[title]):.6f}")
-        # print(title + 'count : ', count(df[title]))
-        # print(title + ' mean : ', mean(df[title]))
+
     table.add_row(countRow)
     table.add_row(meanRow)
     table.add_row(stdRow)
