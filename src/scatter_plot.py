@@ -2,7 +2,7 @@ import sys
 
 import matplotlib.pyplot as plt
 
-from parser import read, getNumericalValues
+from parser import Parser
 
 
 def sanitize(name):
@@ -15,17 +15,13 @@ if __name__ == "__main__":
     datasetPath = "datasets/dataset_train.csv"
 
     try:
-        df = read(datasetPath)
+        data = Parser(datasetPath)
     except (FileNotFoundError, PermissionError, ValueError) as e:
         print(f"error: {e}", file=sys.stderr)
         sys.exit(1)
 
-    if df.empty or len(df.columns) == 0:
-        print("error: no numerical columns to plot", file=sys.stderr)
-        sys.exit(1)
-
-    numericals = getNumericalValues(df)
-    courses = numericals.columns
+    numericals = data.numericals
+    courses = data.courses
 
     if len(courses) < 2:
         print("error: need at least two numerical columns to plot", file=sys.stderr)

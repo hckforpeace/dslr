@@ -1,60 +1,52 @@
 import sys
 
 import matplotlib.pyplot as plt
-import pandas as pd
 
-from parser import read, getNumericalValues
-from stats import count, mean, std, q1, q2, q3, min, max
+from parser import Parser
+
+COLORS = {
+    "Gryffindor": "#AE0001",
+    "Slytherin": "#2A623D",
+    "Ravenclaw": "#222F5B",
+    "Hufflepuff": "#FFDB00",
+}
 
 if __name__ == "__main__":
 
     datasetPath = "datasets/dataset_train.csv"
 
     try:
-        df = read(datasetPath)
+        data = Parser(datasetPath)
     except (FileNotFoundError, PermissionError, ValueError) as e:
         print(f"error: {e}", file=sys.stderr)
         sys.exit(1)
 
-    if df.empty or len(df.columns) == 0:
-        print("error: no numerical columns to describe", file=sys.stderr)
+    if not data.courses:
+        print("error: no numerical columns to plot", file=sys.stderr)
         sys.exit(1)
 
-    scoreByHousesByCourse = {}
+    if data.houses is None:
+        print(f"error: {datasetPath} has no Hogwarts House column", file=sys.stderr)
+        sys.exit(1)
 
-    courses = getNumericalValues(df).columns
-
-    for _, row in df.iterrows():
-        house = row["Hogwarts House"]
-        for course in courses:
-            grade = row[course]
-            if pd.isna(grade):
-                continue
-            scoreByHousesByCourse.setdefault(house, {}).setdefault(course, []).append(grade)
-
-    houses = list(scoreByHousesByCourse.keys())
-    colors = {
-        "Gryffindor": "#AE0001",
-        "Slytherin": "#2A623D",
-        "Ravenclaw": "#222F5B",
-        "Hufflepuff": "#FFDB00",
-    }
+    houses = data.uniqueHouses()
 
     cols = 4
-    rows = -(-len(courses) // cols)  # ceil division
+    rows = -(-len(data.courses) // cols)  # ceil division
     fig, axes = plt.subplots(rows, cols, figsize=(cols * 4, rows * 3))
     axes = axes.flatten()
 
-    for ax, course in zip(axes, courses):
+    # The matrix is stored courses x students, so one subplot is one row of
+    # it: gradesFor only has to mask that row by house.
+    for ax, course in zip(axes, data.courses):
         for house in houses:
-            grades = scoreByHousesByCourse[house].get(course, [])
-            ax.hist(grades, bins=20, alpha=0.5, label=house,
-                    color=colors.get(house))
+            ax.hist(data.gradesFor(course, house), bins=20, alpha=0.5,
+                    label=house, color=COLORS.get(house))
         ax.set_title(course, fontsize=9)
         ax.tick_params(labelsize=7)
 
     # Hide any unused subplots.
-    for ax in axes[len(courses):]:
+    for ax in axes[len(data.courses):]:
         ax.set_visible(False)
 
     # One shared legend for the whole figure.

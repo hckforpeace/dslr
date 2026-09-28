@@ -1,6 +1,6 @@
 import sys
 
-from parser import read, getNumericalValues
+from parser import Parser
 from stats import count, mean, std, q1, q2, q3, min, max
 from prettytable import PrettyTable
 
@@ -12,8 +12,8 @@ if __name__ == "__main__":
     filename = sys.argv[1]
 
     try:
-        df = read(filename)
-        df = getNumericalValues(df)
+        data = Parser(filename)
+        df = data.numericals
     except (FileNotFoundError, PermissionError, ValueError) as e:
         print(f"error: {e}", file=sys.stderr)
         sys.exit(1)

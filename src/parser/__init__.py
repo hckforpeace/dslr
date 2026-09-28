@@ -1,3 +1,3 @@
-from .parser import read, getNumericalValues
+from .parser import Parser
 
-__all__ = ["read", "getNumericalValues"]
+__all__ = ["Parser"]
