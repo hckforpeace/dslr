@@ -8,10 +8,10 @@ from stats import count, mean, std, q1, q2, q3, min, max
 
 if __name__ == "__main__":
 
-    filename = "dataset_train.csv"
+    datasetPath = "datasets/dataset_train.csv"
 
     try:
-        df = read(filename)
+        df = read(datasetPath)
     except (FileNotFoundError, PermissionError, ValueError) as e:
         print(f"error: {e}", file=sys.stderr)
         sys.exit(1)
@@ -62,5 +62,5 @@ if __name__ == "__main__":
     fig.legend(handles, labels, loc="upper right")
 
     fig.tight_layout()
-    fig.savefig("histogram.png", dpi=100)
+    fig.savefig("./images/histogram/histogram.png", dpi=100)
     print("saved histogram.png")

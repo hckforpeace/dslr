@@ -12,10 +12,10 @@ def sanitize(name):
 
 if __name__ == "__main__":
 
-    filename = "dataset_train.csv"
+    datasetPath = "datasets/dataset_train.csv"
 
     try:
-        df = read(filename)
+        df = read(datasetPath)
     except (FileNotFoundError, PermissionError, ValueError) as e:
         print(f"error: {e}", file=sys.stderr)
         sys.exit(1)
@@ -54,7 +54,7 @@ if __name__ == "__main__":
 
         fig.suptitle(base, fontsize=12)
         fig.tight_layout()
-        outfile = f"scatter_plot_{sanitize(base)}.png"
+        outfile = f"images/scatter_plot/scatter_plot_{sanitize(base)}.png"
         fig.savefig(outfile, dpi=100)
         plt.close(fig)
         print(f"saved {outfile}")

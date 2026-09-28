@@ -2,39 +2,23 @@ import os
 
 import pandas as pd
 
-path = "../datasets/"
 
-
-def _resolve(filename: str) -> str:
-    """Resolve `filename` inside the datasets dir, rejecting path traversal."""
-    base = os.path.abspath(path)
-    # If the caller passes an absolute path, use it as-is; otherwise anchor it
-    # to the datasets directory.
-    candidate = filename if os.path.isabs(filename) else os.path.join(base, filename)
-    resolved = os.path.abspath(candidate)
-    # Reject anything that escapes the datasets directory (e.g. "../../etc/passwd").
-    if not os.path.isabs(filename) and os.path.commonpath([base, resolved]) != base:
-        raise ValueError(f"refusing to read outside datasets directory: {filename!r}")
-    return resolved
-
-
-def read(filename: str):
-    filenamePath = _resolve(filename)
+def read(filePath: str):
     try:
-        unparsed_data = pd.read_csv(filenamePath)
+        unparsed_data = pd.read_csv(filePath)
     except FileNotFoundError:
-        raise FileNotFoundError(f"no such file: {filenamePath}")
+        raise FileNotFoundError(f"no such file: {filePath}")
     except PermissionError:
-        raise PermissionError(f"cannot read file: {filenamePath}")
+        raise PermissionError(f"cannot read file: {filePath}")
     except pd.errors.EmptyDataError:
-        raise ValueError(f"file is empty: {filenamePath}")
+        raise ValueError(f"file is empty: {filePath}")
     except (pd.errors.ParserError, UnicodeDecodeError) as e:
-        raise ValueError(f"could not parse {filenamePath} as CSV: {e}")
+        raise ValueError(f"could not parse {filePath} as CSV: {e}")
 
     cleaned = unparsed_data.dropna(axis=1, how="all")
     cleaned = cleaned.drop(columns="Index", errors="ignore")
     if cleaned.empty:
-        raise ValueError(f"no usable data in {filenamePath}")
+        raise ValueError(f"no usable data in {filePath}")
     return cleaned
 
 
